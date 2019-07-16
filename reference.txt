@@ -1,0 +1,19 @@
+00 00 AA BB  MV AA, BB       move from register BB to register AA
+00 01 00 AA: MEMR AA         read from memory location to register AA
+00 01 01 AA: MEMW AA         write to memory location from register AA
+00 01 10 AA: MSRL AA         set memory register low from register AA
+00 01 11 AA: MSRH AA         set memory register high from register AA
+00 10 00 AA: LI AA, 0xAB     read next instruction as data into register AA
+00 10 01 AA: ZERO AA         set content of register AA as 0x00
+
+01 00 AA BB: ADD AA, BB      AA = AA + BB
+01 01 AA BB: SUB AA, BB      AA = AA - BB
+01 10 AA BB: NAND AA, BB     AA = AA NAND BB
+01 11 AA BB: XOR AA, BB      AA = AA XOR BB
+
+10 00 00 AA: ADDI AA, 0xAB   AA = AA + 0xAB
+10 00 01 AA: INC AA          AA = AA + 1
+10 00 10 AA: SUBI AA, 0xAB
+10 00 11 AA: DEC AA 
+
+11 11 11 11: HLT             halt
