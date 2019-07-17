@@ -9,6 +9,7 @@ s4 = 4
 s5 = 5
 s6 = 6
 s7 = 7
+s8 = 8
 
 # controls
 NOOP = 0
@@ -37,6 +38,9 @@ AOPL = 1 << 19
 AOPH = 1 << 20
 AO   = 1 << 21
 ZO   = 1 << 22
+IPSL = 1 << 23
+
+IPSH = 1 << 24
 
 # instructions
 
@@ -197,6 +201,15 @@ def getStep(instruction, flags, step):
         if step == s5:
             return (CI | AO | AOPL | RIE | passIf(RIL, aL) | passIf(RIH, aH))
 
+    if instruction == 0b11_00_00_00:
+        # jmp absolute
+        if step == s3:
+            return (MO | IPSH)
+        if step == s4:
+            return (IPA)
+        if step == s5:
+            return (MO | IPSL)
+
     if instruction == 0b11_11_11_11:
         # halt
         if step == s3:
@@ -207,7 +220,7 @@ def getStep(instruction, flags, step):
 for instruction in range(256):
     for flags in range(16):
         for step in range(16):
-            memory[(instruction << 8) | (flags << 4) | step] = getStep(instruction, flags, step)
+            memory[(flags << 12) | (step << 8) | instruction] = getStep(instruction, flags, step)
     
 with open('rom.img', 'w') as f:
     f.write("v2.0 raw\n")

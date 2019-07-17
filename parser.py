@@ -93,6 +93,14 @@ with open(fname, "r") as f:
             a = line.split(' ')[1].strip()
             out.append((0b10_00_11 << 2) | registers[to])
 
+        elif instruction == "JMP":
+            argvector = "".join(line.split(" ")[1:])
+            h = int(argvector.split(",")[0].strip(), 0)
+            l = int(argvector.split(",")[1].strip(), 0)
+            out.append(0b11_00_00_00)
+            out.append(h)
+            out.append(l)
+
         elif instruction == "HLT":
             out.append(0xFF)
 

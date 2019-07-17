@@ -20,4 +20,6 @@
 10 00 10 AA: DEC AA          AA = AA - 1
 10 00 11 AA: NEG AA          AA = -AA
 
+11 00 00 00: JMP 0xAB, 0xCD  set IP to 0xABCD
+
 11 11 11 11: HLT             halt
