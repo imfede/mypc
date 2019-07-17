@@ -21,5 +21,13 @@
 10 00 11 AA: NEG AA          AA = -AA
 
 11 00 00 00: JMP 0xAB, 0xCD  set IP to 0xABCD
+11 00 00 01
+11 00 00 10
+11 00 00 11
+
+11 00 01 00: JCR 0x12        if carry jump around      
+11 00 01 01: JZR 0x12        if negative jump around
+11 00 01 10: JNR 0x12        if negative jump around
+11 00 01 11: JLTR 0x12       if A1 < A2 jump around
 
 11 11 11 11: HLT             halt

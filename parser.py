@@ -100,6 +100,26 @@ with open(fname, "r") as f:
             out.append(0b11_00_00_00)
             out.append(h)
             out.append(l)
+        
+        elif instruction == "JCR":
+            value = int(line.split(" ")[1].strip(), 0)
+            out.append(0b11_00_01_00)
+            out.append(value)
+
+        elif instruction == "JZR":
+            value = int(line.split(" ")[1].strip(), 0)
+            out.append(0b11_00_01_01)
+            out.append(value)
+
+        elif instruction == "JNR":
+            value = int(line.split(" ")[1].strip(), 0)
+            out.append(0b11_00_01_10)
+            out.append(value)
+
+        elif instruction == "JLTR":
+            value = int(line.split(" ")[1].strip(), 0)
+            out.append(0b11_00_01_11)
+            out.append(value)
 
         elif instruction == "HLT":
             out.append(0xFF)
