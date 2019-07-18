@@ -45,6 +45,9 @@ IPOL = 1 << 25
 IPOH = 1 << 26
 ONEO = 1 << 27
 FFO  = 1 << 28
+SPE  = 1 << 29
+SPI  = 1 << 30
+SPS  = 1 << 31
 
 # flags
 
@@ -284,7 +287,6 @@ def getStep(instruction, flags, step):
         if step == s7:
             return (AO | IPSH)
 
-
     if instruction == 0b11_00_01_11:
         # jmp if a1 < a2 relative
         if step == s2:
@@ -305,6 +307,61 @@ def getStep(instruction, flags, step):
             return (IPOH | A1I)
         if step == s7:
             return (AO | IPSH)
+        
+    if getMasked(0b11_11_11_00, instruction) == 0b11_11_00:
+        # SPSL (SP set low)
+        frmL, frmH = demux(getMasked(0b11, instruction))
+        if step == s2:
+            return (ROE | passIf(ROL, frmL) | passIf(ROH, frmH) | SPE | SPI)
+
+    if getMasked(0b11_11_11_00, instruction) == 0b11_11_01:
+        # SPSH (SP set high)
+        frmL, frmH = demux(getMasked(0b11, instruction))
+        if step == s2:
+            return (ROE | passIf(ROL, frmL) | passIf(ROH, frmH) | SPE | SPI | SPS)
+    
+    if instruction == 0b11_11_10_00:
+        # push SP
+        if step == s2:
+            return (SPE | A1I | WME)
+        if step == s3:
+            return (ONEO | A2I)
+        if step == s4:
+            return (AO | AOPL | SPE | SPI)
+        if step == s5:
+            if hasFlag(flags, A2G1):
+                return NOOP
+            else:
+                return (ZO | A2I)
+        if step == s6:
+            return (SPE | SPS | A1I | WME | WMS)
+        if step == s7:
+            return (AO | AOPL | SPE | SPI | SPS)
+
+    if instruction == 0b11_11_10_01:
+        # pull SP
+        if step == s2:
+            return (SPE | A1I)
+        if step == s3:
+            return (ONEO | A2I)
+        if step == s4:
+            return (AO | SPE | SPI | WME)
+        if step == s5:
+            if hasFlag(flags, CO):
+                return NOOP
+            else:
+                return (ZO | A2I)
+        if step == s6:
+            return (SPE | SPS | A1I)
+        if step == s7:
+            return (AO | SPE | SPI | SPS | WME | WMS)
+
+    if instruction == 0b11_11_10_10:
+        # peek (memory register = sp)
+        if step == s2:
+            return (SPE | WME)
+        if step == s3:
+            return (SPE | SPS | WME | WMS)
 
     if instruction == 0b11_11_11_11:
         # halt

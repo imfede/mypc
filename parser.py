@@ -146,8 +146,25 @@ with open(fname, "r") as f:
             out.append(0b11_00_01_11)
             out.append(value)
 
+        elif instruction == "SPSL":
+            reg = line.split(' ')[1].strip()
+            out.append((0b11_11_00 << 2) | registers[reg])
+
+        elif instruction == "SPSH":
+            reg = line.split(' ')[1].strip()
+            out.append((0b11_11_01 << 2) | registers[reg])
+
+        elif instruction == "PUSH":
+            out.append(0b11_11_10_00)
+
+        elif instruction == "PULL":
+            out.append(0b11_11_10_01)
+
+        elif instruction == "PEEK":
+            out.append(0b11_11_10_10)
+
         elif instruction == "HLT":
-            out.append(0xFF)
+            out.append(0b11_11_11_11)
 
         else:
             print(f"Unknown: {line}")
