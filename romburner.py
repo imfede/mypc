@@ -37,12 +37,11 @@ CI   = 1 << 18
 AOPL = 1 << 19
 AOPH = 1 << 20
 AO   = 1 << 21
-ZO   = 1 << 22
-IPSL = 1 << 23
 
-IPSH = 1 << 24
-IPOL = 1 << 25
-IPOH = 1 << 26
+
+IPE  = 1 << 24
+IPO  = 1 << 25
+IPS  = 1 << 26
 ONEO = 1 << 27
 FFO  = 1 << 28
 SPE  = 1 << 29
@@ -129,7 +128,7 @@ def getStep(instruction, flags, step):
         # zero register
         toL, toH = demux(getMasked(0b11, instruction))
         if step == s2:
-            return (ZO | RIE | passIf(RIL, toL) | passIf(RIH, toH))
+            return (RIE | passIf(RIL, toL) | passIf(RIH, toH))
 
     if getMasked(0b11_11_00_00, instruction) == 0b01_00:
         # add a+b
@@ -189,27 +188,27 @@ def getStep(instruction, flags, step):
         # inc a
         aL, aH = demux(getMasked(0b11, instruction))
         if step == s2:
-            return (ZO | A2I)
+            return (ONEO | A2I)
         if step == s3:
             return (ROE | passIf(ROL, aL) | passIf(ROH, aH) | A1I)
         if step == s4:
-            return (CI | AO | RIE | passIf(RIL, aL) | passIf(RIH, aH))
+            return (AO | RIE | passIf(RIL, aL) | passIf(RIH, aH))
 
     if getMasked(0b11_11_11_00, instruction) == 0b10_00_10:
         # dec a
         aL, aH = demux(getMasked(0b11, instruction))
         if step == s2:
-            return (ZO | A2I)
+            return (ONEO | A2I)
         if step == s3:
             return (ROE | passIf(ROL, aL) | passIf(ROH, aH) | A1I)
         if step == s4:
-            return (CI | AO | AOPL | RIE | passIf(RIL, aL) | passIf(RIH, aH))
+            return (AO | AOPL | RIE | passIf(RIL, aL) | passIf(RIH, aH))
 
     if getMasked(0b11_11_11_00, instruction) == 0b10_00_11:
         # neg a
         aL, aH = demux(getMasked(0b11, instruction))
         if step == s2:
-            return (ZO | A1I)
+            return (A1I)
         if step == s3:
             return (ROE | passIf(ROL, aL) | passIf(ROH, aH) | A2I)
         if step == s4:
@@ -217,96 +216,97 @@ def getStep(instruction, flags, step):
 
     if instruction == 0b11_00_00_00:
         # jmp absolute
+        # THIS IS BUGGED!
         if step == s2:
-            return (MO | IPSH)
+            return (MO | IPE | IPS)
         if step == s3:
             return (IPA)
         if step == s4:
-            return (MO | IPSL)
+            return (MO | IPE)
     
     if instruction == 0b11_00_01_00:
         # jmp if carry relative
         if step == s2:
             if hasFlag(flags, CO):
-                return (A1I | IPOL)
+                return (A1I | IPE | IPO)
             else:
                 return (IPA | MRST)
         if step == s3:
             return (MO | A2I)
         if step == s4:
-            return (AO | CI | IPSL)
+            return (AO | CI | IPE)
         if step == s5 and hasFlag(flags, CO):
             if hasFlag(flags, A2G1):
                 return (FFO | A2I)
             else:
                 return (ONEO | A2I)
         if step == s6:
-            return (IPOH | A1I)
+            return (IPE | IPO | IPS | A1I)
         if step == s7:
-            return (AO | IPSH)
+            return (AO | IPE | IPS)
 
     if instruction == 0b11_00_01_01:
         # jmp if zero relative
         if step == s2:
             if hasFlag(flags, FZ):
-                return (A1I | IPOL)
+                return (A1I | IPE | IPO)
             else:
                 return (IPA | MRST)
         if step == s3:
             return (MO | A2I)
         if step == s4:
-            return (AO | CI | IPSL)
+            return (AO | CI | IPE)
         if step == s5 and hasFlag(flags, CO):
             if hasFlag(flags, A2G1):
                 return (FFO | A2I)
             else:
                 return (ONEO | A2I)
         if step == s6:
-            return (IPOH | A1I)
+            return (IPE | IPO | IPS | A1I)
         if step == s7:
-            return (AO | IPSH)
+            return (AO | IPE | IPS)
 
     if instruction == 0b11_00_01_10:
         # jmp if negative relative
         if step == s2:
             if hasFlag(flags, NEG):
-                return (A1I | IPOL)
+                return (A1I | IPE | IPO)
             else:
                 return (IPA | MRST)
         if step == s3:
             return (MO | A2I)
         if step == s4:
-            return (AO | CI | IPSL)
+            return (AO | CI | IPE)
         if step == s5 and hasFlag(flags, CO):
             if hasFlag(flags, A2G1):
                 return (FFO | A2I)
             else:
                 return (ONEO | A2I)
         if step == s6:
-            return (IPOH | A1I)
+            return (IPE | IPO | IPS | A1I)
         if step == s7:
-            return (AO | IPSH)
+            return (AO | IPE | IPS)
 
     if instruction == 0b11_00_01_11:
         # jmp if a1 < a2 relative
         if step == s2:
             if hasFlag(flags, A2G1):
-                return (A1I | IPOL)
+                return (A1I | IPE | IPO)
             else:
                 return (IPA | MRST)
         if step == s3:
             return (MO | A2I)
         if step == s4:
-            return (AO | CI | IPSL)
+            return (AO | CI | IPE)
         if step == s5 and hasFlag(flags, CO):
             if hasFlag(flags, A2G1):
                 return (FFO | A2I)
             else:
                 return (ONEO | A2I)
         if step == s6:
-            return (IPOH | A1I)
+            return (IPE | IPO | IPS | A1I)
         if step == s7:
-            return (AO | IPSH)
+            return (AO | IPE | IPS)
         
     if getMasked(0b11_11_11_00, instruction) == 0b11_11_00:
         # SPSL (SP set low)
@@ -332,7 +332,7 @@ def getStep(instruction, flags, step):
             if hasFlag(flags, A2G1):
                 return NOOP
             else:
-                return (ZO | A2I)
+                return (A2I)
         if step == s6:
             return (SPE | SPS | A1I | WME | WMS)
         if step == s7:
@@ -350,7 +350,7 @@ def getStep(instruction, flags, step):
             if hasFlag(flags, CO):
                 return NOOP
             else:
-                return (ZO | A2I)
+                return (A2I)
         if step == s6:
             return (SPE | SPS | A1I)
         if step == s7:
