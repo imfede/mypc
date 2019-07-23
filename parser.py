@@ -112,7 +112,7 @@ with open(fname, "r") as f:
             a = line.split(' ')[1].strip()
             out.append((0b10_00_11 << 2) | registers[to])
 
-        elif instruction == "JMP":
+        elif instruction == "PJMP":
             argvector = "".join(line.split(" ")[1:]).strip()
             if argvector.startswith(":"):
                 # abs label
@@ -126,6 +126,15 @@ with open(fname, "r") as f:
                 out.append(h)
                 out.append(l)
         
+        elif instruction == "JMP":
+            out.append(0b11_00_00_01)
+        
+        elif instruction == "JAL":
+            out.append(0b11_00_00_10)
+
+        elif instruction == "RET":
+            out.append(0b11_00_00_11)
+
         elif instruction == "JCR":
             value = parseValue(line.split(" ")[1].strip())
             out.append(0b11_00_01_00)

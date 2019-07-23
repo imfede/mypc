@@ -20,10 +20,10 @@
 10 00 10 AA: DEC AA          AA = AA - 1
 10 00 11 AA: NEG AA          AA = -AA
 
-11 00 00 00: JMP 0xAB, 0xCD  jump to 0xABCD
-11 00 00 01
-11 00 00 10
-11 00 00 11
+11 00 00 00: PJMP 0xAB, 0xCD set JMP registers to 0xABCD
+11 00 00 01: JMP             execute jump
+11 00 00 10: JAL             execute jump and set RET registers to old IP
+11 00 00 11: RET             set IP to RET registers
 
 11 00 01 00: JCR 0x12        if carry jump around      
 11 00 01 01: JZR 0x12        if negative jump around
@@ -37,7 +37,7 @@
 11 11 00 AA: SPSL AA
 11 11 01 AA: SPSH AA
 
-# the stack grows toward lesser addressed
+# the stack grows toward lesser addresses
 11 11 10 00: PUSH            set memory register to SP and advance (decrement) SP
 11 11 10 01: PULL            retreat (increment) SP and set memory register to SP
 11 11 10 10: PEEK            set memory register to SP

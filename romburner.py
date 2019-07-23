@@ -50,6 +50,9 @@ SPS  = 1 << 31
 JMPI = 1 << 32
 JMPE = 1 << 33
 JMPS = 1 << 34
+RETI = 1 << 35
+RETE = 1 << 36
+RETS = 1 << 37
 
 # flags
 
@@ -218,7 +221,7 @@ def getStep(instruction, flags, step):
             return (CI | AO | AOPL | RIE | passIf(RIL, aL) | passIf(RIH, aH))
 
     if instruction == 0b11_00_00_00:
-        # jmp 0xABCD
+        # pjmp 0xABCD
         if step == s2:
             return (MO | JMPE | JMPI | JMPS)
         if step == s3:
@@ -226,9 +229,32 @@ def getStep(instruction, flags, step):
         if step == s4:
             return (MO | JMPE | JMPI)
         if step == s5:
+            return (IPA)
+    
+    if instruction == 0b11_00_00_01:
+        # jmp
+        if step == s2:
             return (JMPE | IPE)
-        if step == s6:
+        if step == s3:
             return (JMPE | JMPS | IPE | IPS)
+    
+    if instruction == 0b11_00_00_10:
+        # jal
+        if step == s2:
+            return (IPE | IPO | RETE | RETI)
+        if step == s3:
+            return (IPE | IPO | IPS | RETE | RETI | RETS)
+        if step == s4:
+            return (JMPE | IPE)
+        if step == s5:
+            return (JMPE | JMPS | IPE | IPS)
+
+    if instruction == 0b11_00_00_11:
+        # ret
+        if step == s2:
+            return (RETE | IPE)
+        if step == s3:
+            return (RETE | RETS | IPE | IPS)
 
     if instruction == 0b11_00_01_00:
         # jmp if carry relative
