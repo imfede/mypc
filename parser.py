@@ -72,6 +72,18 @@ with open(fname, "r") as f:
         elif instruction == "ZERO":
             to = line.split(' ')[1].strip()
             out.append((0b10_01 << 2) | registers[to])
+        
+        elif instruction == "RTWL":
+            out.append(0b00_10_11_00)
+        
+        elif instruction == "RTWH":
+            out.append(0b00_10_11_01) 
+        
+        elif instruction == "RTRL":
+            out.append(0b00_10_11_10)
+        
+        elif instruction == "RTRH":
+            out.append(0b00_10_11_11)
 
         elif instruction == "ADD":
             a = "".join(line.split(' ')[1:]).split(",")[0].strip()

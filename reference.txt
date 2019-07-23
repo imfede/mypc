@@ -8,7 +8,11 @@
 00 10 00 AA: LI AA, 0xAB     read next instruction as data into register AA
 00 10 01 AA: ZERO AA         set content of register AA as 0x00
 00 10 10 
-00 10 11
+
+00 10 11 00: RTWL            write RET Low to RAM
+00 10 11 01: RTWH            write RET High to RAM
+00 10 11 10: RTRL            read RET Low from RAM
+00 10 11 11: RTRH            read RET High from RAM
 
 01 00 AA BB: ADD AA, BB      AA = AA + BB
 01 01 AA BB: SUB AA, BB      AA = AA - BB

@@ -99,13 +99,13 @@ def getStep(instruction, flags, step):
                     RIE | passIf(RIL, toL) | passIf(RIH, toH))
     
     if getMasked(0b11_11_11_00, instruction) == 0b00_01_00:
-        # read from memory
+        # memr: read from memory
         toL, toH = demux(getMasked(0b11, instruction))
         if step == s2:
             return (MIS | MO | RIE | passIf(RIL, toL) | passIf(RIH, toH))
 
     if getMasked(0b11_11_11_00, instruction) == 0b00_01_01:
-        # write memory
+        # memw: write memory
         frmL, frmH = demux(getMasked(0b11, instruction))
         if step == s2:
             return (MIS | MI | ROE | passIf(ROL, frmL) | passIf(ROH, frmH))
@@ -135,6 +135,26 @@ def getStep(instruction, flags, step):
         toL, toH = demux(getMasked(0b11, instruction))
         if step == s2:
             return (RIE | passIf(RIL, toL) | passIf(RIH, toH))
+
+    if instruction == 0b00_10_11_00:
+        # RTWL
+        if step == s2:
+            return (MIS | MI | RETE)
+    
+    if instruction == 0b00_10_11_01:
+        # RTWH
+        if step == s2:
+            return (MIS | MI | RETE | RETS)
+
+    if instruction == 0b00_10_11_10:
+        # RTRL
+        if step == s2:
+            return (MIS | MO | RETE | RETI)
+
+    if instruction == 0b00_10_11_11:
+        # RTRL
+        if step == s2:
+            return (MIS | MO | RETE | RETI | RETS)
 
     if getMasked(0b11_11_00_00, instruction) == 0b01_00:
         # add a+b
