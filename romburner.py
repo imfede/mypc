@@ -38,7 +38,6 @@ AOPL = 1 << 19
 AOPH = 1 << 20
 AO   = 1 << 21
 
-
 IPE  = 1 << 24
 IPO  = 1 << 25
 IPS  = 1 << 26
@@ -47,6 +46,10 @@ FFO  = 1 << 28
 SPE  = 1 << 29
 SPI  = 1 << 30
 SPS  = 1 << 31
+
+JMPI = 1 << 32
+JMPE = 1 << 33
+JMPS = 1 << 34
 
 # flags
 
@@ -215,15 +218,18 @@ def getStep(instruction, flags, step):
             return (CI | AO | AOPL | RIE | passIf(RIL, aL) | passIf(RIH, aH))
 
     if instruction == 0b11_00_00_00:
-        # jmp absolute
-        # THIS IS BUGGED!
+        # jmp 0xABCD
         if step == s2:
-            return (MO | IPE | IPS)
+            return (MO | JMPE | JMPI | JMPS)
         if step == s3:
             return (IPA)
         if step == s4:
-            return (MO | IPE)
-    
+            return (MO | JMPE | JMPI)
+        if step == s5:
+            return (JMPE | IPE)
+        if step == s6:
+            return (JMPE | JMPS | IPE | IPS)
+
     if instruction == 0b11_00_01_00:
         # jmp if carry relative
         if step == s2:
@@ -374,9 +380,19 @@ for instruction in range(256):
     for flags in range(16):
         for step in range(16):
             memory[(flags << 12) | (step << 8) | instruction] = getStep(instruction, flags, step)
-    
-with open('rom.img', 'w') as f:
-    f.write("v2.0 raw\n")
+
+def get0_31(value):
+    return getMasked(0b11111111_11111111_11111111_11111111, value)
+
+def get32_63(value):
+    return getMasked(0b11111111_11111111_11111111_11111111 << 32, value)
+
+with open('rom01.img', 'w') as f1, open('rom02.img', 'w') as f2:
+    f1.write("v2.0 raw\n")
+    f2.write("v2.0 raw\n")
     for i in range(256*256):
-        code = hex(memory[i])[2:]
-        f.write(f"{code}\n")
+        code1 = hex(get0_31(memory[i]))[2:]
+        f1.write(f"{code1}\n")
+
+        code2 = hex(get32_63(memory[i]))[2:]
+        f2.write(f"{code2}\n")

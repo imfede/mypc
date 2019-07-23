@@ -11,6 +11,5 @@ This is the project for my personal computer.
 
 In no particular order:
 - refactor the python files: they are horrible and the cursed child of cmd+c cmd+v
-- fix the `JMP` bug
 - implement `JAL` and `RET`
 - write a "compiler" capable of translating a simple language into assembly
