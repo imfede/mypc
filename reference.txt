@@ -45,7 +45,7 @@
 11 11 10 00: PUSH            set memory register to SP and advance (decrement) SP
 11 11 10 01: PULL            retreat (increment) SP and set memory register to SP
 11 11 10 10: PEEK            set memory register to SP
-11 11 10 11
+11 11 10 11: SPOF 0xAB       set memory register to SP + 0xAB
 
 11 11 11 00
 11 11 11 01

@@ -342,6 +342,20 @@ instructions = [
         ]
     ),
     Instruction(
+        "SPOF",
+        1,
+        0b11_11_10_11,
+        0b11_11_11_11,
+        [
+            lambda: (MO | A1I),
+            lambda: (IPA | SPE | A2I),
+            lambda: (AO | WME),
+            lambda i, f: (ONEO | A2I) if hasFlag(f, CO) else (A2I),
+            lambda: (SPE | SPS | A1I),
+            lambda: (AO | WME | WMS)
+        ]
+    ),
+    Instruction(
         "HLT",
         0,
         0b11_11_11_11,
