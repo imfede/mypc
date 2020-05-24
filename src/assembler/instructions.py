@@ -1,5 +1,5 @@
-from Instruction import Instruction 
-from lines import *
+from .Instruction import Instruction 
+from .lines import *
 
 def getMasked(mask, value):
     assert mask != 0

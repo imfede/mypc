@@ -1,6 +1,6 @@
-from Instruction import Instruction
-from instructions import instructions, getMasked
-from lines import MO, IRE, IPA, MRST
+from ..assembler.Instruction import Instruction
+from ..assembler.instructions import instructions, getMasked
+from ..assembler.lines import MO, IRE, IPA, MRST
 import inspect
 
 def findInstruction(instructions, instruction):
@@ -40,13 +40,14 @@ def get0_31(value):
 def get32_63(value):
     return getMasked(0b11111111_11111111_11111111_11111111 << 32, value)
 
-memory = writeMemory({}, instructions)
-with open('rom01.img', 'w') as f1, open('rom02.img', 'w') as f2:
-    f1.write("v2.0 raw\n")
-    f2.write("v2.0 raw\n")
-    for i in range(256*256):
-        code1 = hex(get0_31(memory[i]))[2:]
-        f1.write(f"{code1}\n")
+def main():
+    memory = writeMemory({}, instructions)
+    with open('rom01.img', 'w') as f1, open('rom02.img', 'w') as f2:
+        f1.write("v2.0 raw\n")
+        f2.write("v2.0 raw\n")
+        for i in range(256*256):
+            code1 = hex(get0_31(memory[i]))[2:]
+            f1.write(f"{code1}\n")
 
-        code2 = hex(get32_63(memory[i]))[2:]
-        f2.write(f"{code2}\n")
+            code2 = hex(get32_63(memory[i]))[2:]
+            f2.write(f"{code2}\n")

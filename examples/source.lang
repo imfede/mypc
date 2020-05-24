@@ -1,0 +1,10 @@
+func int main() {
+    # return 1+2
+    int acc;
+    acc = sum(1, 2);
+    return acc; # here
+}
+
+func int sum(int a, int b) {
+    return a + b;
+}
