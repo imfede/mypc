@@ -1,3 +1,6 @@
 *.img
 *.ass
 __pycache__/
+
+.vscode/
+*.out
