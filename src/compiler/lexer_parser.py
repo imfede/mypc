@@ -81,14 +81,17 @@ def Parser():
         """argument_block : OPEN_PAREN CLOSE_PAREN
                           | OPEN_PAREN argument_list CLOSE_PAREN"""
         if len(p) == 3:
-            return ('argblock', )
+            p[0] = ('argblock', )
         else:
-            return ('argblock', p[2])
+            p[0] = ('argblock', p[2])
 
     def p_argument_list(p):
         """argument_list : TYPE_INT IDENTIFIER
                          | TYPE_INT IDENTIFIER COMMA argument_list"""
-        p[0] = ('arglist', p[2])
+        if len(p) == 3:
+            p[0] = ('arglist', p[2])
+        else:
+            p[0] = ('arglist', p[2], *p[4][1:])
 
     def p_block(p):
         """block : OPEN_BRACE CLOSE_BRACE
@@ -101,7 +104,10 @@ def Parser():
     def p_statement_list(p):
         """statement_list : statement SEMICOLON
                           | statement SEMICOLON statement_list""" 
-        p[0] = ('statement', p[1])
+        if len(p) == 3:
+            p[0] = ('statements', p[1])
+        else:
+            p[0] = ('statements', p[1], *p[3][1:])
     
     def p_statement_declaration(p):
         "statement : TYPE_INT IDENTIFIER"
