@@ -146,7 +146,7 @@ def Parser():
                            | expression COMMA expression_list"""
         p[0] = ('expr_list', p[1])
 
-    return yacc.yacc(debug=True)
+    return yacc.yacc()
 
 def main(fname):
     lexer = Lexer()
