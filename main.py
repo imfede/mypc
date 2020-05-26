@@ -2,7 +2,7 @@
 
 from src.assembler.assembler import main as assemble
 from src.burner.burner import main as burn
-from src.compiler.compiler import main as compile
+from src.compiler.lexer_parser import main as compile
 from sys import argv
 
 # ./main.py assemble|burn|compile <fname>
