@@ -66,7 +66,8 @@ def main(fname):
             for arg in arguments:
                 if arg.startswith(":"):
                     count += 1
-            assert count == instruction.arity
+            if count != instruction.arity:
+                raise AssertionError(f"Mismatched arity for {instruction}")
 
             register_number = getRegistersNumber(instruction)
             assert register_number <= instruction.arity
@@ -93,7 +94,8 @@ def main(fname):
                     out[idx] = offset
                 elif value.startswith(":"):
                     # absolute value
-                    assert value[:-1] in labels
+                    if value[:-1] not in labels:
+                        raise KeyError(value)
                     if value[-1] == "L":
                         code = labels[value[:-1]] & 0b11_11_11_11
                         out[idx] = code

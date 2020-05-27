@@ -21,8 +21,21 @@ class RegisterHandler:
                 self.available_registers[key] = False
                 return
             elif key == register and value == False:
-                raise "Register already free!"
-        raise "Incorrect register!"
+                raise AssertionError(f"Register {register} already free!")
+        raise NameError(register)
+
+    def assert_clear(self):
+        for key, value in self.available_registers.items():
+            if value == True:
+                raise AssertionError(f"Register handler not clear: {self.available_registers}")
+    
+    def active_registers(self):
+        registers = []
+        for key, value in self.available_registers.items():
+            if value == True:
+                registers.append(key)
+
+        return registers
 
 class LabelHandler:
     def __init__(self):

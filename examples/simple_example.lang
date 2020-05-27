@@ -1,0 +1,13 @@
+function int main() {
+    return increment(triplesum(4, 8, 12));
+}
+
+function int triplesum(int p, int o, int i) {
+    return p + o + i;
+}
+
+function int increment(int x) {
+    int one;
+    one = 1;
+    return x + one;
+}

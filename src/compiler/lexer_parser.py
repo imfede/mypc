@@ -3,6 +3,7 @@ import ply.yacc as yacc
 from pprint import pprint
 
 from .nodes import *
+from .helpers import LabelHandler, RegisterHandler
 
 tokens = [
     'FUNCTION',
@@ -156,8 +157,14 @@ def Parser():
 def main(fname):
     lexer = Lexer()
     parser = Parser()
+
+    assembly = ""
+
     with open(fname, "r", encoding="utf-8") as f:   
         source = f.read()
         result = parser.parse(source, lexer=lexer)
-        
-        pprint(result)
+
+        assembly = result.generate_code(LabelHandler())
+        print(assembly)
+    with open("out.as", "w") as f:
+        f.write(assembly)
