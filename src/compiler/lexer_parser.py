@@ -2,13 +2,15 @@ import ply.lex as lex
 import ply.yacc as yacc
 from pprint import pprint
 
+from .nodes import *
+
 tokens = [
     'FUNCTION',
     'RETURN',
     'SEMICOLON',
     'COMMA',
 
-    'TYPE_INT',
+    'TYPE',
 
     'IDENTIFIER',
     
@@ -30,7 +32,7 @@ def Lexer():
     t_RETURN = r'return'
     t_SEMICOLON = r';'
     t_COMMA = r","
-    t_TYPE_INT = r'int'
+    t_TYPE = r'int'
 
     t_IDENTIFIER = r'(?!int)(?!function)(?!return)[a-zA-Z]+'
 
@@ -69,57 +71,57 @@ def Parser():
         """ function_list : function 
                           | function function_list"""
         if len(p) == 2:
-            p[0] = ('functions', p[1])
+            p[0] = Program(function_list=[p[1]])
         else:
-            p[0] = ('functions', p[1], *p[2][1:])
+            p[0] = Program(function_list=[p[1], *p[2].function_list])
 
     def p_function(p):
-        "function : FUNCTION TYPE_INT IDENTIFIER argument_block block"
-        p[0] = ('function', p[3], p[4], p[5])
+        "function : FUNCTION TYPE IDENTIFIER argument_block block"
+        p[0] = Function(name=p[3], arguments=p[4], return_type=p[2], block=p[5])
 
     def p_argument_block(p):
         """argument_block : OPEN_PAREN CLOSE_PAREN
                           | OPEN_PAREN argument_list CLOSE_PAREN"""
         if len(p) == 3:
-            p[0] = ('argblock', )
+            p[0] = []
         else:
-            p[0] = ('argblock', p[2])
+            p[0] = [*p[2]]
 
     def p_argument_list(p):
-        """argument_list : TYPE_INT IDENTIFIER
-                         | TYPE_INT IDENTIFIER COMMA argument_list"""
+        """argument_list : TYPE IDENTIFIER
+                         | TYPE IDENTIFIER COMMA argument_list"""
         if len(p) == 3:
-            p[0] = ('arglist', p[2])
+            p[0] = [Argument(name=p[2], typ=p[1])]
         else:
-            p[0] = ('arglist', p[2], *p[4][1:])
+            p[0] = [Argument(name=p[2], typ=p[1]), *p[4]]
 
     def p_block(p):
         """block : OPEN_BRACE CLOSE_BRACE
                  | OPEN_BRACE statement_list CLOSE_BRACE"""
         if len(p) == 3:
-            p[0] = ('block', )
+            p[0] = []
         else:
-            p[0] = ('block', p[2])
+            p[0] = p[2]
 
     def p_statement_list(p):
         """statement_list : statement SEMICOLON
                           | statement SEMICOLON statement_list""" 
         if len(p) == 3:
-            p[0] = ('statements', p[1])
+            p[0] = [p[1]]
         else:
-            p[0] = ('statements', p[1], *p[3][1:])
+            p[0] = [p[1], *p[3]]
     
     def p_statement_declaration(p):
-        "statement : TYPE_INT IDENTIFIER"
-        p[0] = ('declare', p[2])
+        "statement : TYPE IDENTIFIER"
+        p[0] = Declaration(name=p[2], typ=p[1])
 
     def p_statement_assignment(p):
         "statement : IDENTIFIER EQUAL expression"
-        p[0] = ('assign', p[1], p[3])
+        p[0] = Assignment(name=p[1], expression=p[3])
 
     def p_statement_return(p):
         "statement : RETURN expression"
-        p[0] = ('return', p[2])
+        p[0] = Return(expression=p[2])
 
     def p_expression_paren(p):
         "expression : OPEN_BRACE expression CLOSE_BRACE"
@@ -127,24 +129,27 @@ def Parser():
 
     def p_expression_identifier(p):
         "expression : IDENTIFIER"
-        p[0] = ('identifier', p[1])
+        p[0] = IdentifierValue(name=p[1])
 
     def p_expression_number(p):
         "expression : NUMBER"
-        p[0] = ('number', p[1])
-
-    def p_expression_plus(p):
-        "expression : expression PLUS expression"
-        p[0] = ('plus', p[1], p[3])
+        p[0] = NumberLiteral(value=p[1])
 
     def p_expression_function_call(p):
         "expression : IDENTIFIER OPEN_PAREN expression_list CLOSE_PAREN"
-        p[0] = ('func_call', p[1], p[3])
+        p[0] = FunctionCall(name=p[1], arguments=p[3])
 
     def p_expression_list(p):
         """expression_list : expression
                            | expression COMMA expression_list"""
-        p[0] = ('expr_list', p[1])
+        if len(p) == 2:
+            p[0] = [p[1]]
+        else:
+            p[0] = [p[1], *p[3]]
+
+    def p_expression_plus(p):
+        "expression : expression PLUS expression"
+        p[0] = ExpressionPlus(lhs=p[1], rhs=p[3])
 
     return yacc.yacc()
 
