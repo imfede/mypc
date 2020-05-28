@@ -36,7 +36,7 @@ class FunctionContext:
         lst = list(reversed(self.arguments))
         for index, var in enumerate(lst):
             if var.name == variable_name:
-                return index + 7 # 2 for the ret_address, 4 for the register, 1 for the stack offset
+                return index + 7 + len(self.variables) # 2 for the ret_address + 4 for the register + 1 for the stack offset + n for the local variables on the stack
 
         raise IndexError(f"Variable {variable_name} not valid!")
 

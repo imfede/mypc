@@ -165,6 +165,5 @@ def main(fname):
         result = parser.parse(source, lexer=lexer)
 
         assembly = result.generate_code(LabelHandler())
-        print(assembly)
     with open("out.as", "w") as f:
         f.write(assembly)
