@@ -24,6 +24,10 @@
 10 00 10 AA: DEC AA          AA = AA - 1
 10 00 11 AA: NEG AA          AA = -AA
 
+10 01
+10 10
+10 11
+
 11 00 00 00: PJMP 0xAB, 0xCD set JMP registers to 0xABCD (read on the two next memory words)
 11 00 00 01: JMP             execute jump
 11 00 00 10: JAL             execute jump and set RET registers to old IP
