@@ -1,3 +1,4 @@
+#[allow(clippy::upper_case_acronyms)]
 pub enum Flag {
     /// Flag Zero, 1 if the output of the ALU is 0x00, 0 otherwise.
     FZ,

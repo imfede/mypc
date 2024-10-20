@@ -1,8 +1,8 @@
 use std::env;
 
-mod burner;
 mod constants;
 mod starts_with;
+mod burn;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -12,7 +12,7 @@ fn main() {
     }
 
     match args[1].as_str() {
-        "burn" => burner::burn(),
+        "burn" => burn::burn(),
         other => println!("Unknown command: {}", other),
     }
 }
