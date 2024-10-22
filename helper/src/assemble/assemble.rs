@@ -1,7 +1,11 @@
 use crate::assemble::assembly_line::AssemblyLine;
 use crate::constants::machine_instruction::MachineInstruction;
+use nom::branch::alt;
+use nom::bytes::complete::{is_not, tag};
 use nom::character::complete::multispace1;
-use nom::multi::separated_list0;
+use nom::combinator::map;
+use nom::multi::{many1, separated_list0};
+use nom::sequence::tuple;
 use nom::IResult;
 use std::collections::HashMap;
 
@@ -24,6 +28,16 @@ pub fn assemble(input: String) {
 }
 
 fn parse_instructions(input: &str) -> IResult<&str, Vec<AssemblyLine>> {
-    separated_list0(multispace1, AssemblyLine::parse)(input)
+    separated_list0(
+        many1(alt((multispace1, parse_comment))),
+        AssemblyLine::parse,
+    )(input)
+}
+
+fn parse_comment(input: &str) -> IResult<&str, &str> {
+    map(tuple((
+        tag("#"),
+        is_not("\n"),
+    )), |(_, comment)| comment)(input)
 }
 
