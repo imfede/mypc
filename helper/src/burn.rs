@@ -1,5 +1,5 @@
 use crate::constants::flag::Flags;
-use crate::constants::instruction::{steps, Instruction};
+use crate::constants::machine_instruction::{steps, MachineInstruction};
 use std::fs;
 
 pub fn burn() {
@@ -14,7 +14,7 @@ pub fn burn() {
         let step = (rom_address >> 8) & 0b11_11;
         let flags = ((rom_address >> 12) & 0b11_11) as u8;
 
-        let instruction = Instruction::from(instruction_value);
+        let instruction = MachineInstruction::from(instruction_value);
         let steps = steps(instruction, Flags::from(flags));
         let control_word = steps[step];
 

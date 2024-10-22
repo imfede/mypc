@@ -1,7 +1,7 @@
 use super::{control_line::ControlLine, control_word::ControlWord};
 
 #[allow(unused)]
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub enum GeneralRegister {
     A,
     B,
