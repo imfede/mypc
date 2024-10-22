@@ -1,5 +1,4 @@
-use crate::assemble::assembly_instruction::AssemblyInstruction;
-use crate::assemble::assembly_to_machine_code;
+use crate::assemble::assembly_line::AssemblyLine;
 use crate::constants::machine_instruction::MachineInstruction;
 use nom::character::complete::multispace1;
 use nom::multi::separated_list0;
@@ -17,24 +16,14 @@ pub fn assemble(input: String) {
     };
 
     let (rest, assembly) = parse_instructions(&input).unwrap();
-    println!("Instructions: {:?}", assembly);
-    println!("Rest: {:?}", rest);
+    println!("Instructions: {:#?}", assembly);
+    println!("Rest: {:#?}", rest);
 
-    let machine_code: Vec<_> = assembly.into_iter().flat_map(|x| assembly_to_machine_code::to_machine_code(x, &instructions)).collect();
-    println!("Machine code ({}):\n{:?}", machine_code.len(), machine_code);
+    // let machine_code: Vec<_> = assembly.into_iter().flat_map(|x| assembly_to_machine_code::to_machine_code(x, &instructions)).collect();
+    // println!("Machine code ({}):\n{:?}", machine_code.len(), machine_code);
 }
 
-fn parse_instructions(input: &str) -> IResult<&str, Vec<AssemblyInstruction>> {
-    separated_list0(multispace1, AssemblyInstruction::parse)(input)
+fn parse_instructions(input: &str) -> IResult<&str, Vec<AssemblyLine>> {
+    separated_list0(multispace1, AssemblyLine::parse)(input)
 }
 
-// struct AssemblyLine {
-//     label: Option<String>,
-//     instruction: AssemblyInstruction,
-// }
-//
-// impl AssemblyLine {
-//     fn parse_label(input: &str) -> IResult<&str, &str> {
-//         delimited(tag("."), is_not(":"), tag(":"))(input)
-//     }
-// }

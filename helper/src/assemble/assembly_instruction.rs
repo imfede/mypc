@@ -1,12 +1,62 @@
 use crate::assemble::assembly_register::AssemblyRegister;
-use crate::hex_u8;
 use crate::hex_u8::{hex_u16, hex_u8};
 use nom::branch::alt;
 use nom::bytes::complete::tag;
-use nom::character::complete::{multispace0, multispace1};
-use nom::combinator::map;
-use nom::sequence::tuple;
+use nom::character::complete::{alphanumeric1, multispace0, multispace1};
+use nom::combinator::{map, not};
+use nom::sequence::{delimited, tuple};
 use nom::IResult;
+
+#[derive(Debug)]
+enum AbsoluteAddress {
+    Label { name: String },
+    HardCoded { address: u16 },
+}
+
+impl AbsoluteAddress {
+    pub fn parse_label_name(input: &str) -> IResult<&str, String> {
+        map(
+            delimited(tag(":"), alphanumeric1, not(alphanumeric1)),
+            |name: &str| name.to_string(),
+        )(input)
+    }
+}
+
+impl AbsoluteAddress {
+    fn parse(input: &str) -> IResult<&str, AbsoluteAddress> {
+        alt((
+            map(
+                AbsoluteAddress::parse_label_name,
+                |name| AbsoluteAddress::Label { name },
+            ),
+            map(
+                hex_u16,
+                |value| AbsoluteAddress::HardCoded { address: value },
+            ),
+        ))(input)
+    }
+}
+
+#[derive(Debug)]
+enum Offset {
+    Label { name: String },
+    HardCoded { offset: i8 },
+}
+
+impl Offset {
+    fn parse(input: &str) -> IResult<&str, Offset> {
+        alt((
+            map(
+                delimited(tag("."), alphanumeric1, not(alphanumeric1)),
+                |name: &str| Offset::Label { name: name.to_string() },
+            ),
+            map(
+                nom::character::complete::i8,
+                |value| Offset::HardCoded { offset: value },
+            ),
+        ))(input)
+    }
+}
 
 #[allow(clippy::upper_case_acronyms)]
 #[derive(Debug)]
@@ -31,14 +81,14 @@ pub enum AssemblyInstruction {
     INC { dst: AssemblyRegister },
     DEC { dst: AssemblyRegister },
     NEG { dst: AssemblyRegister },
-    PJMP { address: u16 },
+    PJMP { address: AbsoluteAddress },
     JMP,
     JAL,
     RET,
-    JCR { offset: i8 },
-    JZR { offset: i8 },
-    JNR { offset: i8 },
-    JLTR { offset: i8 },
+    JCR { offset: Offset },
+    JZR { offset: Offset },
+    JNR { offset: Offset },
+    JLTR { offset: Offset },
     SPSL { src: AssemblyRegister },
     SPSH { src: AssemblyRegister },
     PUSH,
@@ -149,9 +199,11 @@ impl AssemblyInstruction {
             tag("LI"),
             multispace1,
             AssemblyRegister::parse,
-            multispace1,
-            hex_u8::hex_u8,
-        )), |(_, _, dst, _, value)| AssemblyInstruction::LI { dst, value })(input)
+            multispace0,
+            tag(","),
+            multispace0,
+            hex_u8,
+        )), |(_, _, dst, _, _, _, value)| AssemblyInstruction::LI { dst, value })(input)
     }
 
     fn parse_zero(input: &str) -> IResult<&str, AssemblyInstruction> {
@@ -227,9 +279,11 @@ impl AssemblyInstruction {
             tag("ADDI"),
             multispace1,
             AssemblyRegister::parse,
-            multispace1,
+            multispace0,
+            tag(","),
+            multispace0,
             hex_u8
-        )), |(_, _, dst, _, value)| AssemblyInstruction::ADDI { dst, value })(input)
+        )), |(_, _, dst, _, _, _, value)| AssemblyInstruction::ADDI { dst, value })(input)
     }
 
     fn parse_inc(input: &str) -> IResult<&str, AssemblyInstruction> {
@@ -260,7 +314,7 @@ impl AssemblyInstruction {
         map(tuple((
             tag("PJMP"),
             multispace1,
-            hex_u16,
+            AbsoluteAddress::parse,
         )), |(_, _, address)| AssemblyInstruction::PJMP { address })(input)
     }
 
@@ -280,7 +334,7 @@ impl AssemblyInstruction {
         map(tuple((
             tag("JCR"),
             multispace1,
-            nom::character::complete::i8
+            Offset::parse,
         )), |(_, _, offset)| AssemblyInstruction::JCR { offset })(input)
     }
 
@@ -288,7 +342,7 @@ impl AssemblyInstruction {
         map(tuple((
             tag("JZR"),
             multispace1,
-            nom::character::complete::i8
+            Offset::parse,
         )), |(_, _, offset)| AssemblyInstruction::JZR { offset })(input)
     }
 
@@ -296,7 +350,7 @@ impl AssemblyInstruction {
         map(tuple((
             tag("JNR"),
             multispace1,
-            nom::character::complete::i8
+            Offset::parse,
         )), |(_, _, offset)| AssemblyInstruction::JNR { offset })(input)
     }
 
@@ -304,7 +358,7 @@ impl AssemblyInstruction {
         map(tuple((
             tag("JLTR"),
             multispace1,
-            nom::character::complete::i8
+            Offset::parse,
         )), |(_, _, offset)| AssemblyInstruction::JLTR { offset })(input)
     }
 
