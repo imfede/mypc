@@ -1,3 +1,4 @@
+use eyre::bail;
 use std::io::Read;
 use std::{env, fs};
 
@@ -7,11 +8,10 @@ mod burn;
 mod assemble;
 mod hex_u8;
 
-fn main() {
+fn main() -> eyre::Result<()> {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
-        println!("Usage: {} <command>", args[0]);
-        return;
+        bail!("Usage: {} <command>", args[0]);
     }
 
     match args[1].as_str() {
@@ -19,16 +19,18 @@ fn main() {
         "assemble" if args.len() < 3 => {
             let buffer = {
                 let mut buffer = String::new();
-                std::io::stdin().read_to_string(&mut buffer).unwrap();
+                std::io::stdin().read_to_string(&mut buffer)?;
                 buffer.trim().to_string()
             };
-            assemble::assemble::assemble(buffer);
+            let buffer: &'static str = buffer.leak();
+            assemble::assemble::assemble(buffer)
         }
         "assemble" => {
-            let file_contents = fs::read(&args[2]).unwrap();
-            let file_contents = String::from_utf8(file_contents).unwrap();
+            let file_contents = fs::read(&args[2])?;
+            let file_contents = String::from_utf8(file_contents)?;
+            let file_contents: &'static str = file_contents.leak();
             assemble::assemble::assemble(file_contents)
         }
-        other => println!("Unknown command: {}", other),
+        other => bail!("Unknown command: {}", other),
     }
 }

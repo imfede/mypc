@@ -1,43 +1,54 @@
-use crate::assemble::assembly_line::AssemblyLine;
-use crate::constants::machine_instruction::MachineInstruction;
-use nom::branch::alt;
-use nom::bytes::complete::{is_not, tag};
-use nom::character::complete::multispace1;
-use nom::combinator::map;
-use nom::multi::{many1, separated_list0};
-use nom::sequence::tuple;
-use nom::IResult;
-use std::collections::HashMap;
+use crate::assemble::assembly_line;
+use crate::assemble::binary_program::BinaryProgram;
+use crate::assemble::intermediate_assembly::IntermediateAssembly;
 
-pub fn assemble(input: String) {
+pub fn assemble(input: &'static str) -> eyre::Result<()> {
     println!("Assembling:\n-----\n{}\n-----", input);
 
-    let instructions = {
-        let mut map: HashMap<MachineInstruction, u8> = (0..=0xFF).map(|value| (MachineInstruction::from(value), value)).collect();
-        // Even if all unused instructions are essentially NOPs, for consistency we manually chose one.
-        map.insert(MachineInstruction::NOP, 0b11_11_11_10);
-        map
-    };
+    let (_, assembly) = assembly_line::parse_instructions(input.trim())?;
 
-    let (rest, assembly) = parse_instructions(&input).unwrap();
-    println!("Instructions: {:#?}", assembly);
-    println!("Rest: {:#?}", rest);
+    let intermediate_assembly = IntermediateAssembly::try_from(assembly)?;
 
-    // let machine_code: Vec<_> = assembly.into_iter().flat_map(|x| assembly_to_machine_code::to_machine_code(x, &instructions)).collect();
-    // println!("Machine code ({}):\n{:?}", machine_code.len(), machine_code);
+    let assembled_instructions = BinaryProgram::try_from(intermediate_assembly)?;
+
+    println!("Machine code");
+    for (index, byte) in assembled_instructions.0.iter().enumerate() {
+        println!("{:0>4x}: {:0>8b} ({:0>2x})", index, byte, byte);
+    }
+
+    Ok(())
 }
 
-fn parse_instructions(input: &str) -> IResult<&str, Vec<AssemblyLine>> {
-    separated_list0(
-        many1(alt((multispace1, parse_comment))),
-        AssemblyLine::parse,
-    )(input)
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-fn parse_comment(input: &str) -> IResult<&str, &str> {
-    map(tuple((
-        tag("#"),
-        is_not("\n"),
-    )), |(_, comment)| comment)(input)
-}
+    #[test]
+    fn test_fibonacci() -> eyre::Result<()> {
+        let input = "\
+        # Start the Fibonacci sequence from 0x01 and 0x00
+        LI A, 0x01
+        LI B, 0x00
 
+        :loop
+            ADD A, B
+            # Use D as a temporary register to swap A and B
+            MV D, A
+            MV A, B
+            MV B, D
+            JCR .halt
+            PJMP :loop
+            JMP
+
+        .halt
+        HLT";
+
+        let (_, assembly) = assembly_line::parse_instructions(input.trim())?;
+        let intermediate_assembly = IntermediateAssembly::try_from(assembly)?;
+        let program = BinaryProgram::try_from(intermediate_assembly)?;
+
+        assert_eq!(program.0, vec![0x20, 0x01, 0x21, 0x00, 0x41, 0x0c, 0x01, 0x07, 0xc4, 0x05, 0xc0, 0x00, 0x04, 0xc1, 0xff]);
+
+        Ok(())
+    }
+}

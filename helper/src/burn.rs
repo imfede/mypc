@@ -2,7 +2,7 @@ use crate::constants::flag::Flags;
 use crate::constants::machine_instruction::{steps, MachineInstruction};
 use std::fs;
 
-pub fn burn() {
+pub fn burn() -> eyre::Result<()> {
     let mut rom1 = String::with_capacity(580_000);
     let mut rom2 = String::with_capacity(580_000);
 
@@ -27,4 +27,6 @@ pub fn burn() {
 
     fs::write("rom01.img", rom1).unwrap();
     fs::write("rom02.img", rom2).unwrap();
+
+    Ok(())
 }

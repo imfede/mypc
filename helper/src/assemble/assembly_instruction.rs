@@ -8,7 +8,7 @@ use nom::sequence::{delimited, tuple};
 use nom::IResult;
 
 #[derive(Debug)]
-enum AbsoluteAddress {
+pub enum AbsoluteAddress {
     Label { name: String },
     HardCoded { address: u16 },
 }
@@ -38,7 +38,7 @@ impl AbsoluteAddress {
 }
 
 #[derive(Debug)]
-enum Offset {
+pub enum Offset {
     Label { name: String },
     HardCoded { offset: i8 },
 }
