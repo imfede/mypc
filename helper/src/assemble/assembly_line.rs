@@ -3,7 +3,7 @@ use nom::branch::alt;
 use nom::bytes::complete::{is_not, tag};
 use nom::character::complete::{alphanumeric1, multispace0, multispace1};
 use nom::combinator::{eof, map, opt};
-use nom::multi::{many1, separated_list0};
+use nom::multi::{many0, many1, separated_list0};
 use nom::sequence::{delimited, tuple};
 use nom::IResult;
 
@@ -51,7 +51,7 @@ impl AssemblyLine {
 
 pub fn parse_instructions(input: &str) -> IResult<&str, Vec<AssemblyLine>> {
     delimited(
-        opt(parse_comment),
+        many0(alt((parse_comment, multispace1))),
         separated_list0(
             many1(alt((multispace1, parse_comment))),
             AssemblyLine::parse,

@@ -1,4 +1,5 @@
-# Start the Fibonacci sequence from 0x01 and 0x00
+# Programm to calculate the Fibonacci sequence
+# Start the sequence from 0x01 and 0x00
 LI A, 0x01
 LI B, 0x00
 
